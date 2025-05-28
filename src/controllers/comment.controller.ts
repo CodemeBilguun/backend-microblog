@@ -25,7 +25,8 @@ export const getCommentsByArticle = async (req: Request, res: Response) => {
       }
 
       const isAuthor = req.user.id === article.authorId;
-      const isStaff = [Role.ADMIN, Role.EDITOR].includes(req.user.role);
+      const isStaff =
+        req.user.role === Role.ADMIN || req.user.role === Role.EDITOR;
 
       if (!isAuthor && !isStaff) {
         return res
@@ -76,7 +77,8 @@ export const createComment = async (req: Request, res: Response) => {
     // Only allow comments on published articles unless user is author/admin/editor
     if (!article.isPublished) {
       const isAuthor = req.user.id === article.authorId;
-      const isStaff = [Role.ADMIN, Role.EDITOR].includes(req.user.role);
+      const isStaff =
+        req.user.role === Role.ADMIN || req.user.role === Role.EDITOR;
 
       if (!isAuthor && !isStaff) {
         return res
