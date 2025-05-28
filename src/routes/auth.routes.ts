@@ -15,6 +15,10 @@ router.get("/verify/:token", authController.verifyEmail);
 router.post("/forgot-password", authController.forgotPassword);
 router.post("/reset-password/:token", authController.resetPassword);
 
+// Demo routes for testing - would never exist in production
+router.post("/demo-forgot-password", authController.demoForgotPassword);
+router.get("/demo-get-verification/:email", authController.demoGetVerification);
+
 // Protected routes
 router.get("/me", authenticate, authController.getCurrentUser);
 

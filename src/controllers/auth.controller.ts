@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import * as authService from "../services/auth.service";
 import * as emailService from "../services/email.service";
 import { validateEmail } from "../utils/validation.util";
+import prisma from "../utils/prisma.util"; // Add this import
+import crypto from "crypto"; // Add this import for token generation
+import * as bcrypt from "bcrypt";
 
 // Register a new user
 export const register = async (req: Request, res: Response) => {
@@ -46,7 +49,80 @@ export const verifyEmail = async (req: Request, res: Response) => {
     res.status(400).json({ message: "Invalid or expired verification token" });
   }
 };
+export const demoForgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
 
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Generate reset token
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiryTime = new Date();
+    expiryTime.setHours(expiryTime.getHours() + 1); // 1 hour from now
+
+    // Update user with reset token
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetToken: token,
+        resetTokenExpiry: expiryTime,
+      },
+    });
+
+    // Return token for demo purposes
+    res.json({
+      message: "DEMO MODE: Password reset requested",
+      demoInfo: {
+        resetToken: token,
+        resetUrl: `https://backend-microblog-production.up.railway.app/api/auth/reset-password/${token}`,
+        note: "This direct token access is for demonstration purposes only",
+      },
+    });
+  } catch (error) {
+    console.error("Error in demo forgot password:", error);
+    res.status(500).json({ message: "Error processing password reset" });
+  }
+};
+
+// Demo method that returns verification token for a newly registered user
+export const demoGetVerification = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.params;
+
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!user.verificationToken) {
+      return res
+        .status(404)
+        .json({ message: "No verification token found for this user" });
+    }
+
+    res.json({
+      message: "DEMO MODE: Verification token retrieved",
+      demoInfo: {
+        verificationUrl: `https://backend-microblog-production.up.railway.app/api/auth/verify/${user.verificationToken}`,
+        note: "This direct token access is for demonstration purposes only",
+      },
+    });
+  } catch (error) {
+    console.error("Error in demo get verification:", error);
+    res.status(500).json({ message: "Error retrieving verification token" });
+  }
+};
 // Login
 export const login = async (req: Request, res: Response) => {
   try {
