@@ -28,16 +28,40 @@ async function getTransporter() {
   }
 }
 
+// Helper function to get the base URL based on environment
+function getBaseUrl(): string {
+  // First try BASE_URL env variable
+  if (process.env.BASE_URL) {
+    return process.env.BASE_URL;
+  }
+
+  // Next, try to detect production environment from Railway
+  if (process.env.RAILWAY_STATIC_URL) {
+    return process.env.RAILWAY_STATIC_URL;
+  }
+
+  // For Railway deployments, construct from service name
+  if (process.env.RAILWAY_SERVICE_NAME) {
+    return `https://${process.env.RAILWAY_SERVICE_NAME}-production.up.railway.app`;
+  }
+
+  // Default to frontend URL if specified
+  if (process.env.FRONTEND_URL) {
+    return process.env.FRONTEND_URL;
+  }
+
+  // Fallback to localhost
+  return "http://localhost:5000";
+}
+
 export async function sendVerificationEmail(
   email: string,
   token: string
 ): Promise<void> {
   try {
     const transporter = await getTransporter();
-
-    const verificationUrl = `${
-      process.env.FRONTEND_URL || "http://localhost:5000"
-    }/api/auth/verify/${token}`;
+    const baseUrl = getBaseUrl();
+    const verificationUrl = `${baseUrl}/api/auth/verify/${token}`;
 
     const mailOptions = {
       from: '"Microblog" <noreply@microblog.com>',
@@ -48,11 +72,14 @@ export async function sendVerificationEmail(
         <h1>Email Verification</h1>
         <p>Please verify your email address by clicking on the link below:</p>
         <a href="${verificationUrl}">Verify Email</a>
+        <p>If the link doesn't work, copy and paste this URL into your browser:</p>
+        <p>${verificationUrl}</p>
       `,
     };
 
     const info = await transporter.sendMail(mailOptions);
     console.log("Verification email sent:", info.messageId);
+    console.log("Using base URL:", baseUrl);
 
     // Log preview URL for testing
     console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
@@ -68,10 +95,8 @@ export async function sendPasswordResetEmail(
 ): Promise<void> {
   try {
     const transporter = await getTransporter();
-
-    const resetUrl = `${
-      process.env.FRONTEND_URL || "http://localhost:5000"
-    }/api/auth/reset-password/${token}`;
+    const baseUrl = getBaseUrl();
+    const resetUrl = `${baseUrl}/api/auth/reset-password/${token}`;
 
     const mailOptions = {
       from: '"Microblog" <noreply@microblog.com>',
@@ -82,12 +107,15 @@ export async function sendPasswordResetEmail(
         <h1>Password Reset</h1>
         <p>You requested a password reset. Please click on the link below:</p>
         <a href="${resetUrl}">Reset Password</a>
+        <p>If the link doesn't work, copy and paste this URL into your browser:</p>
+        <p>${resetUrl}</p>
         <p>If you didn't request this, please ignore this email.</p>
       `,
     };
 
     const info = await transporter.sendMail(mailOptions);
     console.log("Password reset email sent:", info.messageId);
+    console.log("Using base URL:", baseUrl);
 
     // Log preview URL for testing
     console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
