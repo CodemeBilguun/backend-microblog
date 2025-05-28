@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES6", // Modern JavaScript
+    "module": "CommonJS", // Required for Node.js
+    "rootDir": "./src", // Source folder
+    "outDir": "./dist", // Compiled output
+    "esModuleInterop": true, // Allow CommonJS interop (e.g., require -> import)
+    "forceConsistentCasingInFileNames": true, // Enforce consistent casing
+    "strict": true, // Enable all strict type checks
+    "skipLibCheck": true // Skip type checking for external libraries
+  },
+  "include": ["src"], // Include all files in src/
+  "exclude": ["node_modules"] // Ignore node_modules
+}
