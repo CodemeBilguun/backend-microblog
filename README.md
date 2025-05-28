@@ -93,16 +93,22 @@
 
 ### Алхамууд:
 
-1. **Төслийг татах**
-   Алхамууд:
+- **Төслийг татаж авах:**  
+  git clone https://github.com/CodemeBilguun/backend-microblog.git  
+  cd backend-microblog
 
-git clone https://github.com/username/backend-microblog.git
-cd backend-microblog
-npm install
-.env file үүсгэх
-DATABASE_URL="postgresql://username:password@localhost:5432/microblog"
-JWT_SECRET="your-jwt-secret-key"
-npx prisma migrate dev
-npx prisma db seed
-npm run dev
-http://localhost:5000/api/articles
+- **Dependecies суулгах:**  
+  npm install
+
+- **.env файл үүсгэх:**  
+  DATABASE_URL="postgresql://username:password@localhost:5432/microblog"  
+  JWT_SECRET="your-jwt-secret-key"
+
+- **Өгөгдлийн санг үүсгэж, тохируулах:**  
+  npx prisma migrate dev
+
+- **Тестийн өгөгдөл оруулах:**  
+  npx prisma db seed
+
+- **Хөгжүүлэлтийн сервер асаах:**  
+  npm run dev
